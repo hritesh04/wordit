@@ -14,56 +14,79 @@ const io = new Server(server,{
 io.on("connection",(socket) => {
     socket.username = getUserName()
     socket.emit("name",socket.username)
+
+    // creating room
     socket.on("createRoom", (roomId) => {
         const game = GameManager.getInstance();
-        game.addRoom(roomId)
-        game.joinRoom(roomId,socket.username)
+        game.addAndJoinRoom(roomId,socket.username)
         socket.join(roomId)
-        io.in(roomId).emit("new",`${socket.username} joined the room`)
+        socket.roomId=roomId
+        socket.emit("info",`Room with id ${roomId} successfully created`)
+        io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
     })
+
+    // joining room
     socket.on("joinRoom",(roomId)=>{
         const rooms = io.sockets.adapter.rooms;
         if(rooms.has(roomId)){
             const game = GameManager.getInstance()
             game.joinRoom(roomId,socket.username)
             socket.join(roomId)
-            io.in(roomId).emit("new",`${socket.username} joined the room`)
+            socket.roomId=roomId
+            socket.emit("info",`successfully joined room ${roomId}`)
+            io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
         }else{
-            socket.emit("errors","Invalid roomId")
+            socket.emit("erros",`unable to join room - ${roomId}`)
         }
     })
-    socket.on("status",({status,roomId})=>{
+
+    // set user ready status
+    socket.on("status",(status)=>{
         const game = GameManager.getInstance()
-        game.setState(status,roomId,socket.username)
+        game.setState(status,socket.roomId,socket.username)
+        io.in(socket.roomId).emit("roomEvents",`${socket.username} is ${status ? "ready" : "not ready"}`)
     })
-    socket.on("start",(roomId)=>{
+
+    // 
+    socket.on("start",()=>{
         const game = GameManager.getInstance()
-        const allPlayersReady = game.startGame(roomId)
+        const allPlayersReady = game.startGame(socket.roomId,socket.username)
         if(allPlayersReady){
-            io.in(roomId).emit("start","game will start in 5 seconds")
+            io.in(socket.roomId).emit("roomEvents","game will start in 5 seconds")
             setTimeout(()=>{
-                io.in(roomId).emit("turn",game.next(roomId))
-                io.in(roomId).emit("suffix", getSuffix(""))
+                let nextTurn = game.next(socket.roomId)
+                io.in(socket.roomId).emit("roomEvents",`${nextTurn}'s turn`)
+                io.in(socket.roomId).emit("turn",nextTurn)
+                io.in(socket.roomId).emit("suffix", getSuffix(""))
             },5000)
+        }else{
+            io.in(socket.roomId).emit("roomEvents","all players are not ready")
         }
     })
-    socket.on("guess",({word,roomId})=>{
+    socket.on("guess",({word,suffix})=>{
         const isCorrect = checkWord(word)
         if(isCorrect){
+            console.log("here")
             const game = GameManager.getInstance()
-            const player = game.next(roomId)
-            socket.in(roomId).emit("new",`${player}'s chance`)
-            socket.in(roomId).emit("turn",player)
+            const player = game.next(socket.roomId)
+            io.in(socket.roomId).emit("roomEvents",`${player}'s turn`)
+            io.in(socket.roomId).emit("turn",player)
+            io.in(socket.roomId).emit("suffix",getSuffix(suffix))
+        }else{
+            io.in(socket.roomId).emit("roomEvents","Wrong Answer")
         }
     })
     socket.on("leaveRoom", (roomId) => {
         const game = GameManager.getInstance()
         game.leaveRoom(roomId,socket.username)
         socket.leave(roomId)
-        io.in(roomId).emit("new",`${socket.username} left the room`)
+        io.in(roomId).emit("roomEvents",`${socket.username} left the room`)
     
     })
     socket.on("disconnect", ()=>{
+        const game = GameManager.getInstance()
+        game.leaveRoom(socket.roomId,socket.username)
+        io.in(socket.roomId).emit("roomEvents",`${socket.username} left the room`)
         console.log("disconnected")
     })
 })

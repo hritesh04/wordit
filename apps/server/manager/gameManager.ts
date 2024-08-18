@@ -1,6 +1,7 @@
 type Player = {
     username:string;
     status:boolean;
+    leader:boolean;
 }
 export class GameManager {
     private static instance:GameManager;
@@ -14,27 +15,39 @@ export class GameManager {
         }
         return this.instance
     }
-    addRoom(roomId:string){
-        this.games.set(roomId,{counter:0,started:false,players:[]})
+    addAndJoinRoom(roomId:string,username:string){
+        this.games.set(roomId,{counter:0,started:false,players:[{username,status:true,leader:true}]})
         console.log(`created room ${roomId}`)
+        console.dir(this.games,{dept:null})
     }
     joinRoom(roomId:string,username:string){
-        let room = this.games.get(roomId)!
-        room.players.push({username,status:false})
+        const room = this.games.get(roomId)!
+        room.players.push({username,status:false,leader:false})
         console.log(`${username} joined room ${roomId}`)
+        console.dir(this.games,{dept:null})
     }
     leaveRoom(roomId:string,username:string){
-        let room = this.games.get(roomId)!
-        room.players = room.players.filter((player)=>player.username!==username)
-        if (room.players.length < 1){
+        const room = this.games.get(roomId)!
+        if (room.players.length <= 1 && room.players[0].username === username){
             this.games.delete(roomId)
+            return
         }
+        const playerIndex = room.players.findIndex((p)=>p.username===username)
+        if(room.players[playerIndex].leader){
+            if(playerIndex != room.players.length-1){
+                room.players[playerIndex+1].leader = true;
+            }else{
+                room.players[playerIndex-1].leader=true;
+            }
+        }
+        room.players = room.players.filter((player)=>player.username!==username)
         console.log(`${username} left room ${roomId}`)
+        console.dir(this.games,{dept:null})
     }
     next(roomId:string):string{
-        console.log(this.games)
-        let room = this.games.get(roomId)!
+        const room = this.games.get(roomId)!
         room.counter++;
+        console.dir(this.games,{dept:null})
         return room.players[room.counter%room.players.length].username
     }
     setState(ready:boolean,roomId:string,username:string){
@@ -46,12 +59,16 @@ export class GameManager {
         if(playerIndex===-1){
             return
         }
-        room.players[playerIndex].status=ready
+        room.players[playerIndex].status=!room.players[playerIndex].status
         console.dir(this.games,{depth:null})
     }
-    startGame(roomId:string):boolean{
+    startGame(roomId:string,username:string):boolean{
         const room = this.games.get(roomId)
         if(!room){
+            return false
+        }
+        const playerIndex = room.players.findIndex((player)=>player.username===username && player.leader===true)
+        if(playerIndex === -1){
             return false
         }
         let count = 0;
@@ -60,7 +77,7 @@ export class GameManager {
                 count++
             }
         })
-        if(count>room.players.length/2){
+        if(count>=room.players.length/2){
             room.started=true;
         }
         console.dir(this.games,{dept:null})

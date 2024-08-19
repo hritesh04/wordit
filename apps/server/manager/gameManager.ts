@@ -27,7 +27,10 @@ export class GameManager {
         console.dir(this.games,{dept:null})
     }
     leaveRoom(roomId:string,username:string){
-        const room = this.games.get(roomId)!
+        const room = this.games.get(roomId)
+        if(!room){
+            return
+        }
         if (room.players.length <= 1 && room.players[0].username === username){
             this.games.delete(roomId)
             return

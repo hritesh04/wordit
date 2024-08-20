@@ -16,7 +16,7 @@ const Routes = createBrowserRouter([
     ]
   },
   {
-    path:"/:username/:roomId",
+    path:"/:name/:roomId",
     element:<GameBackGround />,
     children:[
       {

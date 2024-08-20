@@ -1,6 +1,4 @@
-import React, { useEffect } from "react"
 import { RoomCard } from "./RoomCard"
-import { socket } from "../../socket"
 
 export const Banner = ({children}:{children:React.ReactNode}) => {
     return(

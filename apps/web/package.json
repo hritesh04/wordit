@@ -15,7 +15,8 @@
     "react-router-dom": "^6.26.1",
     "react-starfield": "^1.0.3",
     "react-typed": "^2.0.12",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.7.5",
+    "sonner": "^1.5.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

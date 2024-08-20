@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { socket } from "../../socket";
 import { connectSocket } from "../../utils/connectSocket";
-import { Route, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 export const RoomCard = () => {
     const [select, setSelect] = useState("");
     const [roomId,setRoomId] =useState("");
-    const [username,setUsername] = useState("");
     const naviagte = useNavigate();
 
     const handleCancel = () => {
@@ -15,7 +15,23 @@ export const RoomCard = () => {
     
     const handleCreateRoom = () => {
         if(!roomId){
-            console.log("Empty RoomId")
+            toast.error("RoomID is empty")
+            return
+        }
+        let isConnected = socket.connected
+        if(!isConnected){
+            const success = connectSocket()
+            if(!success){
+                toast.error("unable to connect socket")
+                return
+            }
+        }
+        socket.emit("createRoom",roomId)
+    }
+    
+    const handleJoinRoom = () =>{
+        if(!roomId){
+            toast.error("RoomID is empty")
             return
         }
         let isConnected = socket.connected
@@ -26,30 +42,28 @@ export const RoomCard = () => {
                 return
             }
         }
-        socket.emit("createRoom",roomId)
-        naviagte(`/${username}/${roomId}`)
+        socket.emit("joinRoom",roomId)
     }
-
+    
     useEffect(()=>{
-
-        const handleUsername = (name:string) => {
-            setUsername(name)
-        }
-
-        const handleInfoEvents = (msg:string) => {
-            console.log(msg)
-        }
-
+        console.log("Room Card Render")
         const handleErrorEvents = (msg:string) => {
-            console.log(msg)
+            toast.error(msg)
         } 
-        socket.on("name",handleUsername)
-        socket.on("info",handleInfoEvents)
+        const handleRedirects = (msg:string)=>{
+            naviagte(`/${msg}`)
+        }
+        const handleInfoEvents = (msg:string)=>{
+            toast.info(msg)
+        }
         socket.on("errors",handleErrorEvents)
+        socket.on("redirects",handleRedirects)
+        socket.on("info",handleInfoEvents)
+
         return ()=>{
-            socket.off("name")
-            socket.off("info")
-            socket.off("errors")
+            socket.off("info",handleInfoEvents)
+            socket.off("redirects",handleRedirects)
+            socket.off("error",handleErrorEvents)
         }
     },[])
 
@@ -97,10 +111,11 @@ export const RoomCard = () => {
                             type="text"
                             placeholder="Enter room ID"
                             className="bg-white bg-opacity-15 rounded-md p-2 px-4 w-[50%]"
+                            onChange={(e)=>setRoomId(e.target.value)}
                         />
                         <button
                             className="bg-green-500 text-white rounded-md p-2 px-4"
-                            onClick={() => alert("Joining room...")}
+                            onClick={handleJoinRoom}
                         >
                             Join
                         </button>

@@ -17,3 +17,6 @@ body,
   height: 100%;
   color-scheme: light dark;
 }
+.fade {
+  -webkit-mask-image: linear-gradient(0deg, #000 30%, transparent);
+}

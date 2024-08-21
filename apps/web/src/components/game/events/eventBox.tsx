@@ -1,9 +1,9 @@
 export const EventBox = ({events}:{events:string[]}) => {
     return (
-        <div className="h-full flex overflow-auto flex-col-reverse p-4 fade justify-center">
+        <div className="flex-1 overflow-auto flex flex-col-reverse fade items-center pb-10">
             {events.map((event,i)=>{
                 return (
-                    <p key={i} className=" text-center">
+                    <p key={i} className=" text-md text-center">
                         {event}
                     </p>
                 )

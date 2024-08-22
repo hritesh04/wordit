@@ -1,5 +1,4 @@
 import { io } from 'socket.io-client';
 
-const URL = process.env.NODE_ENV === 'production' ? "" : "http://localhost:3000/";
-console.log(URL)
-export const socket = io(URL);
+const URL = process.env.NODE_ENV === 'production' ? process.env.BACKEND_URL : "http://localhost:3000/";
+export const socket = io(URL!);

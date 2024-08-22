@@ -17,7 +17,6 @@ export class GameManager {
     }
     addAndJoinRoom(roomId:string,username:string){
         this.games.set(roomId,{counter:0,started:false,players:[{username,status:true,leader:true}]})
-        console.log(`created room ${roomId}`)
         console.dir(this.games,{dept:null})
     }
     joinRoom(roomId:string,username:string):boolean{
@@ -25,7 +24,6 @@ export class GameManager {
         if(room.started)
             return false
         room.players.push({username,status:false,leader:false})
-        console.log(`${username} joined room ${roomId}`)
         return true
     }
     leaveRoom(roomId:string,username:string){

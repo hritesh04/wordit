@@ -25,7 +25,6 @@ io.on("connection",(socket) => {
         socket.emit("info",`Room with id ${roomId} successfully created`)
         socket.emit("redirects",`${socket.username}/${roomId}`)
         io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
-        console.log(io.sockets.adapter.rooms)
     })
 
     // joining room
@@ -35,7 +34,6 @@ io.on("connection",(socket) => {
             return
         }
         if(rooms && rooms.get(roomId)){
-            console.log(roomId)
             const game = GameManager.getInstance()
             const success = game.joinRoom(roomId,socket.username)
             if(!success){
@@ -86,20 +84,16 @@ io.on("connection",(socket) => {
         if(!roomPool.has(socket.roomId)){
             return {}
         }
-        console.log(socket.roomId)
         const game = GameManager.getInstance();
         const room = game.getGameState(socket.roomId)
-        console.log(room)
         socket.emit("state",room)
     })
 
     // guess if the word is correct
     socket.on("guess",({word,suffix})=>{
-        console.log(word,suffix)
         socket.broadcast.in(socket.roomId).emit("update",{type:"guess",data:word})
         const isCorrect = checkWord(word+suffix)
         if(isCorrect){
-            console.log("here")
             const game = GameManager.getInstance()
             const player = game.next(socket.roomId)
             io.in(socket.roomId).emit("roomEvents",`${player}'s turn`)
@@ -128,7 +122,6 @@ io.on("connection",(socket) => {
         if(newLeader){
             io.to(socket.roomId).emit("update",{type:"leader",data:{username:newLeader.username,status:newLeader.status,leader:newLeader.leader}})
         }
-        // todo if the user leaving has the turn
         if(gameState.started && turn){
             const nextTurn = game.next(socket.roomId)
             io.in(socket.roomId).emit("roomEvents",`${nextTurn}'s turn`)
@@ -155,7 +148,6 @@ io.on("connection",(socket) => {
         if(newLeader){
             io.to(socket.roomId).emit("update",{type:"leader",data:{username:newLeader.username,status:newLeader.status,leader:newLeader.leader}})
         }
-        console.log("disconnected")
     })
 })
 

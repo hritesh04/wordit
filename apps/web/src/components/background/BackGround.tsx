@@ -7,7 +7,7 @@ export const BackGround = (
         <Starfield 
         starCount={1000}
         starColor={[255, 255, 255]}
-        speedFactor={0.01}
+        speedFactor={0.04}
         backgroundColor="black"
         />
         <div className="h-full">

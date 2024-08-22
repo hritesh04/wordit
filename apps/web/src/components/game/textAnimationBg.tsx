@@ -58,7 +58,7 @@ export default function GameTextbg(props: Props) {
 				const putPixel = (x: number, y: number, brightness: number, ch: string) => {
 					const rgb = 'rgba(' + starColor[0] + ',' + starColor[1] + ',' + starColor[2] + ',' + brightness + ')';
 					c.fillStyle = rgb;
-					c.font = "20px Arial"; // Set the font size and type
+					c.font = "13px Teko"; // Set the font size and type
 					c.fillText(ch, x, y);
 				};
 

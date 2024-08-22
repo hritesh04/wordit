@@ -83,7 +83,6 @@ export const GamePage = () => {
                 setIsLeader(true)
                 setStatus(true)
             }
-            console.log(game)
         }
         const handleUpdate = (msg:Update) => {
             const {type,data} = msg;
@@ -111,7 +110,6 @@ export const GamePage = () => {
                 case "status" :
                     if(typeof data !== "object")
                         return
-                    console.log("Update")
                     setPlayer((prev) => {
                         return prev.map((p) =>
                             p.username === (data as Player).username
@@ -139,11 +137,8 @@ export const GamePage = () => {
                 case "stop":
                     if(typeof data !== "string")
                         return
-                    console.log("Stopping game, setting started to false");
                     setGame((prev) => {
-                        console.log("Previous game state:", prev);
                         const newState = { ...prev, started: false };
-                        console.log("New game state:", newState);
                         return newState;
                     });
                     toast.info(`Game stopped : ${data}`)
@@ -157,7 +152,6 @@ export const GamePage = () => {
                     if(typeof data !== "object")
                         return
                     if(data.username===username){
-                        console.log(data)
                         setIsLeader(data.leader)
                         setStatus(data.status)
                         setPlayer((prev)=>{
@@ -197,8 +191,8 @@ export const GamePage = () => {
     },[])
     
     return(
-        <div className=" grid grid-cols-4 h-full max-h-screen overflow-hidden">
-            <div className="h-full col-span-3">
+        <div className="h-full grid grid-rows-5 max-h-screen md:flex overflow-hidden">
+            <div className="h-full md:w-9/12 row-span-3">
                 <GameBoard>
                     {
                         game.started && 
@@ -222,8 +216,8 @@ export const GamePage = () => {
                     }
                 </GameBoard>
             </div>
-            <div className="h-full overflow-hidden col-span-1 gap-2 flex flex-col">
-                <div className="overflow-auto h-1/4 flex flex-wrap p-2">
+            <div className="h-full overflow-hidden row-span-2 md:w-3/12 gap-2 flex flex-col-reverse">
+                <div className="overflow-auto order-1 h-1/4 flex flex-wrap p-2 md:order-2">
                 <PlayersBox>
                     {player.map((p)=> <PlayerCard key={p.username} name={p.username} status={p.status} state={game.started} turn={turn}/>)}
                 </PlayersBox>

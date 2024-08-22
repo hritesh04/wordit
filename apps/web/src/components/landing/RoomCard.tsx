@@ -72,25 +72,27 @@ export const RoomCard = () => {
                 select === "" || select === "create" ?
                 (
                     select === "create" ?
-                    <div className=" flex space-x-2 justify-center">
+                    <div className=" flex space-x-2 justify-center flex-col md:flex-row md:gap-0 gap-4">
                     <input
                         type="text"
                         placeholder="Enter room name"
-                        className="bg-white bg-opacity-15 rounded-md p-2 px-4 w-[50%]"
+                        className="bg-white bg-opacity-15 rounded-md p-2 px-4 md:w-[50%]"
                         onChange={(e)=>setRoomId(e.target.value)}
                         />
+                        <div className="flex md:gap-2 gap-4">
                         <button
-                            className="bg-green-500 text-white rounded-md p-2 px-4"
+                            className="bg-green-500 text-white rounded-md p-2 w-full px-4"
                             onClick={handleCreateRoom}
-                        >
+                            >
                             create
                         </button>
                         <button
-                            className="bg-red-500 text-white rounded-md p-2 px-4"
+                            className="bg-red-500 text-white rounded-md p-2 w-full px-4"
                             onClick={handleCancel}
-                        >
+                            >
                             Cancel
                         </button>
+                        </div>
                         </div>
                     :
                     <button
@@ -105,25 +107,27 @@ export const RoomCard = () => {
                 select === "" || select === "join" ?
                 (
                     select === "join" ?
-                    <div className="flex space-x-2 justify-center">
+                    <div className="flex space-x-2 justify-center flex-col md:flex-row md:gap-0 gap-4">
                         <input
                             type="text"
                             placeholder="Enter room ID"
-                            className="bg-white bg-opacity-15 rounded-md p-2 px-4 w-[50%]"
+                            className="bg-white bg-opacity-15 rounded-md p-2 px-4 md:w-[50%]"
                             onChange={(e)=>setRoomId(e.target.value)}
                         />
+                        <div className="flex md:gap-2 gap-4">
                         <button
-                            className="bg-green-500 text-white rounded-md p-2 px-4"
+                            className="bg-green-500 text-white rounded-md p-2 px-4 w-full"
                             onClick={handleJoinRoom}
-                        >
+                            >
                             Join
                         </button>
                         <button
-                            className="bg-red-500 text-white rounded-md p-2 px-4"
+                            className="bg-red-500 text-white rounded-md p-2 px-4 w-full"
                             onClick={handleCancel}
-                        >
+                            >
                             Cancel
                         </button>
+                        </div>
                     </div>
                     :
                     <button

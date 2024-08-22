@@ -5,7 +5,6 @@ export const GameBackGround = () => {
 
     setTimeout(()=>{
         let char = "abcdefghijklmnopqrstuvwxyz"
-        console.log("trigger")
         setChar(prev => [...prev, ...char.split('')])
     },1000)
 
@@ -13,7 +12,7 @@ export const GameBackGround = () => {
         <>
             <Textbg 
                 starColor={[255, 255, 255]}
-                speedFactor={0.1}
+                speedFactor={0.07}
                 backgroundColor="black"
                 />
             <div className=" h-full">

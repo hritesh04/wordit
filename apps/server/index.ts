@@ -1,3 +1,5 @@
+import * as dotenv from "dotenv";
+dotenv.config()
 import { Server } from 'socket.io';
 import {createServer} from "node:http";
 import { getUserName } from './utils/username';
@@ -10,7 +12,6 @@ const io = new Server(server,{
         origin:process.env.FRONTEND_URL,
     },
 });
-
 io.on("connection",(socket) => {
     socket.username = getUserName()
     socket.emit("name",socket.username)

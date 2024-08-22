@@ -6,6 +6,7 @@ import { toast } from "sonner";
 export const RoomCard = () => {
     const [select, setSelect] = useState("");
     const [roomId,setRoomId] =useState("");
+    const [name,setName]=useState("");
     const naviagte = useNavigate();
 
     const handleCancel = () => {
@@ -38,7 +39,7 @@ export const RoomCard = () => {
         if(!isConnected){
             const success = connectSocket()
             if(!success){
-                console.log("unable to connect socket")
+                toast.error("unable to connect socket")
                 return
             }
         }
@@ -46,17 +47,20 @@ export const RoomCard = () => {
     }
     
     useEffect(()=>{
-        console.log("Room Card Render")
         const handleErrorEvents = (msg:string) => {
             toast.error(msg)
         } 
         const handleRedirects = (msg:string)=>{
-            naviagte(`/${msg}`)
+            naviagte(msg)
         }
         const handleInfoEvents = (msg:string)=>{
             toast.info(msg)
         }
+        const handleName = (msg:string) => {
+            setName(msg)
+        }
         socket.on("errors",handleErrorEvents)
+        socket.on("name",handleName)
         socket.on("redirects",handleRedirects)
         socket.on("info",handleInfoEvents)
 

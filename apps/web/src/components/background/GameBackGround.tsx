@@ -3,11 +3,11 @@ import Textbg from "../game/textAnimationBg"
 import { setChar } from "../game/textAnimationBg"
 export const GameBackGround = () => {
 
-    // setInterval(()=>{
-    //     let char = "hritesh"
-    //     console.log("trigger")
-    //     setChar(prev => [...prev, ...char.split('')])
-    // },1000)
+    setTimeout(()=>{
+        let char = "abcdefghijklmnopqrstuvwxyz"
+        console.log("trigger")
+        setChar(prev => [...prev, ...char.split('')])
+    },1000)
 
     return(
         <>

@@ -22,49 +22,81 @@ io.on("connection",(socket) => {
         socket.join(roomId)
         socket.roomId=roomId
         socket.emit("info",`Room with id ${roomId} successfully created`)
+        socket.emit("redirects",`${socket.username}/${roomId}`)
         io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
+        console.log(io.sockets.adapter.rooms)
     })
 
     // joining room
     socket.on("joinRoom",(roomId)=>{
         const rooms = io.sockets.adapter.rooms;
-        if(rooms.has(roomId)){
+        if(socket.roomId){
+            return
+        }
+        if(rooms && rooms.get(roomId)){
+            console.log(roomId)
             const game = GameManager.getInstance()
-            game.joinRoom(roomId,socket.username)
+            const success = game.joinRoom(roomId,socket.username)
+            if(!success){
+                socket.emit("errors","Game already started")
+                return
+            }
             socket.join(roomId)
             socket.roomId=roomId
             socket.emit("info",`successfully joined room ${roomId}`)
+            socket.emit("redirects",`${socket.username}/${roomId}`)
             io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
+            socket.broadcast.to(roomId).emit("update",{type:"join",data:{username:socket.username,status:false,leader:false}})
         }else{
-            socket.emit("erros",`unable to join room - ${roomId}`)
+            socket.emit("errors",`unable to join room - ${roomId}`)
         }
     })
 
     // set user ready status
-    socket.on("status",(status)=>{
+    socket.on("status",()=>{
         const game = GameManager.getInstance()
-        game.setState(status,socket.roomId,socket.username)
+        const status = game.setState(socket.roomId,socket.username)
+        const gameState = game.getGameState(socket.roomId);
         io.in(socket.roomId).emit("roomEvents",`${socket.username} is ${status ? "ready" : "not ready"}`)
+        socket.broadcast.to(socket.roomId).emit("update",{type:"status",data:{username:socket.username,status,leader:false}})
     })
 
-    // 
+    // start game
     socket.on("start",()=>{
         const game = GameManager.getInstance()
         const allPlayersReady = game.startGame(socket.roomId,socket.username)
         if(allPlayersReady){
             io.in(socket.roomId).emit("roomEvents","game will start in 5 seconds")
+            io.in(socket.roomId).emit("update",{type:"start",data:"Game Starting in 5 seconds"})
             setTimeout(()=>{
-                let nextTurn = game.next(socket.roomId)
+                const nextTurn = game.next(socket.roomId)
                 io.in(socket.roomId).emit("roomEvents",`${nextTurn}'s turn`)
                 io.in(socket.roomId).emit("turn",nextTurn)
                 io.in(socket.roomId).emit("suffix", getSuffix(""))
-            },5000)
+                },5000)
         }else{
-            io.in(socket.roomId).emit("roomEvents","all players are not ready")
+            io.in(socket.roomId).emit("roomEvents","not all players are ready")
         }
     })
+
+    // returns game state
+    socket.on("state", ()=>{
+        const roomPool = io.sockets.adapter.rooms;
+        if(!roomPool.has(socket.roomId)){
+            return {}
+        }
+        console.log(socket.roomId)
+        const game = GameManager.getInstance();
+        const room = game.getGameState(socket.roomId)
+        console.log(room)
+        socket.emit("state",room)
+    })
+
+    // guess if the word is correct
     socket.on("guess",({word,suffix})=>{
-        const isCorrect = checkWord(word)
+        console.log(word,suffix)
+        socket.broadcast.in(socket.roomId).emit("update",{type:"guess",data:word})
+        const isCorrect = checkWord(word+suffix)
         if(isCorrect){
             console.log("here")
             const game = GameManager.getInstance()
@@ -76,17 +108,52 @@ io.on("connection",(socket) => {
             io.in(socket.roomId).emit("roomEvents","Wrong Answer")
         }
     })
-    socket.on("leaveRoom", (roomId) => {
+
+    // leave room
+    socket.on("leaveRoom", (turn) => {
         const game = GameManager.getInstance()
-        game.leaveRoom(roomId,socket.username)
-        socket.leave(roomId)
-        io.in(roomId).emit("roomEvents",`${socket.username} left the room`)
-    
+        game.leaveRoom(socket.roomId,socket.username)
+        socket.leave(socket.roomId)
+        io.in(socket.roomId).emit("roomEvents",`${socket.username} left the room`)
+        const gameState = game.getGameState(socket.roomId)
+        if(!gameState){
+            return
+        }
+        if(gameState.started === true && gameState.players.length <= 1){
+            io.to(socket.roomId).emit("update",{type:"stop",data:"not enough player"})
+        }
+        const newLeader = game.getLeader(socket.roomId)
+        socket.broadcast.to(socket.roomId).emit("update",{type:"left",data:{username:socket.username,status:false,leader:false}})
+        if(newLeader){
+            io.to(socket.roomId).emit("update",{type:"leader",data:{username:newLeader.username,status:newLeader.status,leader:newLeader.leader}})
+        }
+        // todo if the user leaving has the turn
+        if(gameState.started && turn){
+            const nextTurn = game.next(socket.roomId)
+            io.in(socket.roomId).emit("roomEvents",`${nextTurn}'s turn`)
+            io.in(socket.roomId).emit("turn",nextTurn)
+            io.in(socket.roomId).emit("suffix", getSuffix(""))
+        }
     })
+
+    // disconnect socket
     socket.on("disconnect", ()=>{
         const game = GameManager.getInstance()
         game.leaveRoom(socket.roomId,socket.username)
+        socket.leave(socket.roomId)
         io.in(socket.roomId).emit("roomEvents",`${socket.username} left the room`)
+        const gameState = game.getGameState(socket.roomId)
+        if(!gameState){
+            return
+        }
+        if(gameState.started === true && gameState.players.length <= 1){
+            io.to(socket.roomId).emit("update",{type:"stop",data:"not enough player"})
+        }
+        const newLeader = game.getLeader(socket.roomId)
+        socket.broadcast.to(socket.roomId).emit("update",{type:"left",data:{username:socket.username,status:false,leader:false}})
+        if(newLeader){
+            io.to(socket.roomId).emit("update",{type:"leader",data:{username:newLeader.username,status:newLeader.status,leader:newLeader.leader}})
+        }
         console.log("disconnected")
     })
 })

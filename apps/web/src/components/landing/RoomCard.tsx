@@ -6,7 +6,6 @@ import { toast } from "sonner";
 export const RoomCard = () => {
     const [select, setSelect] = useState("");
     const [roomId,setRoomId] =useState("");
-    const [name,setName]=useState("");
     const naviagte = useNavigate();
 
     const handleCancel = () => {
@@ -56,11 +55,7 @@ export const RoomCard = () => {
         const handleInfoEvents = (msg:string)=>{
             toast.info(msg)
         }
-        const handleName = (msg:string) => {
-            setName(msg)
-        }
         socket.on("errors",handleErrorEvents)
-        socket.on("name",handleName)
         socket.on("redirects",handleRedirects)
         socket.on("info",handleInfoEvents)
 

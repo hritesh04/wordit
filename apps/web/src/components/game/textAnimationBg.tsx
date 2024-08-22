@@ -10,7 +10,7 @@ interface Props {
 export let setChar: React.Dispatch<React.SetStateAction<string[]>>;
 
 export default function GameTextbg(props: Props) {
-	const { speedFactor = 0.05, backgroundColor = 'black', starColor = [255, 255, 255], starCount = 5000 } = props;
+	const { speedFactor = 0.05, backgroundColor = 'black', starColor = [255, 255, 255] } = props;
 
 	const [charQueue, setCharQueue] = useState<string[]>([]);
 

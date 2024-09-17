@@ -18,6 +18,7 @@ interface Player {
     username: string;
     status: boolean;
     leader: boolean;
+    lives:number;
 }
 
 interface Game {
@@ -34,6 +35,7 @@ export const GamePage = () => {
         players: []
     });
     const [player,setPlayer]=useState<Player[]>([])
+    const [gameState,setGameState]=useState(false);
     const [status,setStatus]=useState(false);
     const [isLeader,setIsLeader]=useState(false);
     const [turn,setTurn]=useState("");
@@ -78,7 +80,9 @@ export const GamePage = () => {
         const handleGameState = (msg:Game)=>{
             setGame(msg)
             setPlayer(msg.players)
+            setGameState(msg.started)
             const isCreater = msg.players.filter((p)=>p.username===username && p.leader===true)
+            console.log(msg)
             if(isCreater.length !== 0){
                 setIsLeader(true)
                 setStatus(true)
@@ -97,7 +101,7 @@ export const GamePage = () => {
                     })
                     setPlayer((prev)=>[...prev,data as Player])
                     break
-                    case "left" :
+                case "left" :
                     if(typeof data !== "object")
                         return
                     setGame((prev)=> {
@@ -128,6 +132,7 @@ export const GamePage = () => {
                             setGame((prev)=>{
                                 return {...prev,started:true}
                             })
+                            setGameState(true)
                             return
                         }
                         toast.info(i)
@@ -141,6 +146,7 @@ export const GamePage = () => {
                         const newState = { ...prev, started: false };
                         return newState;
                     });
+                    setGameState(false)
                     toast.info(`Game stopped : ${data}`)
                     break
                 case "guess":
@@ -195,7 +201,7 @@ export const GamePage = () => {
             <div className="h-full md:w-9/12 row-span-3">
                 <GameBoard>
                     {
-                        game.started && 
+                        gameState && 
                         <>
                             <div>{turn} is Playing</div>
                             {turn === username ? 
@@ -219,20 +225,20 @@ export const GamePage = () => {
             <div className="h-full overflow-hidden row-span-2 md:w-3/12 gap-2 flex flex-col-reverse">
                 <div className="overflow-auto order-1 h-1/4 flex flex-wrap p-2 md:order-2">
                 <PlayersBox>
-                    {player.map((p)=> <PlayerCard key={p.username} name={p.username} status={p.status} state={game.started} turn={turn}/>)}
+                    {player.map((p)=> <PlayerCard key={p.username} state={gameState} player={p} turn={turn}/>)}
                 </PlayersBox>
                 </div>
                 <EventBox events={events}/>
                 <div className="flex-none">
                     <StatusButton>
                         {
-                            !game.started &&
+                            !gameState &&
                             <button className={`rounded-md p-8 w-full ${status || isLeader ? "bg-red-600" : "bg-green-500"}`}
                             onClick={handleReadyStatus}>
                             {status && isLeader ? "Start" : status ? "Cancel" :" Ready"}
                         </button>
                         }
-                        <button className={`p-8 rounded-md w-full ${game.started ? "bg-red-600" : "bg-slate-500"}`}
+                        <button className={`p-8 rounded-md w-full ${gameState ? "bg-red-600" : "bg-slate-500"}`}
                             onClick={handleExitRoom}
                         >
                             Exit Room

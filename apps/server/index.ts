@@ -45,7 +45,7 @@ io.on("connection",(socket) => {
             socket.emit("info",`successfully joined room ${roomId}`)
             socket.emit("redirects",`${socket.username}/${roomId}`)
             io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
-            socket.broadcast.to(roomId).emit("update",{type:"join",data:{username:socket.username,status:false,leader:false}})
+            socket.broadcast.to(roomId).emit("update",{type:"join",data:{username:socket.username,status:false,leader:false,lives:3}})
         }else{
             socket.emit("errors",`unable to join room - ${roomId}`)
         }
@@ -93,15 +93,21 @@ io.on("connection",(socket) => {
     socket.on("guess",({word,suffix})=>{
         socket.broadcast.in(socket.roomId).emit("update",{type:"guess",data:word})
         const isCorrect = checkWord(word+suffix)
-        if(isCorrect){
-            const game = GameManager.getInstance()
-            const player = game.next(socket.roomId)
-            io.in(socket.roomId).emit("roomEvents",`${player}'s turn`)
-            io.in(socket.roomId).emit("turn",player)
-            io.in(socket.roomId).emit("suffix",getSuffix(suffix))
-        }else{
+        const game = GameManager.getInstance()
+        const player = game.next(socket.roomId)
+        if(!isCorrect){
+            game.reduceLive(socket.roomId,socket.username)
+            const room = game.getGameState(socket.roomId)
+            if(room?.players.length === 1){
+                io.in(socket.roomId).emit("roomEvents",`The Winner is ${room.players[0].username}`)
+                io.in(socket.roomId).emit("state",room)
+                return
+            }
             io.in(socket.roomId).emit("roomEvents","Wrong Answer")
+            io.in(socket.roomId).emit("state",room)
         }
+        io.in(socket.roomId).emit("turn",player)
+        io.in(socket.roomId).emit("suffix",getSuffix(suffix))    
     })
 
     // leave room
@@ -114,8 +120,9 @@ io.on("connection",(socket) => {
         if(!gameState){
             return
         }
-        if(gameState.started === true && gameState.players.length <= 1){
+        if(gameState.players.length <= 1){
             io.to(socket.roomId).emit("update",{type:"stop",data:"not enough player"})
+            io.to(socket.roomId).emit("state",gameState)
         }
         const newLeader = game.getLeader(socket.roomId)
         socket.broadcast.to(socket.roomId).emit("update",{type:"left",data:{username:socket.username,status:false,leader:false}})

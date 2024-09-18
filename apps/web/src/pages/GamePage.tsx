@@ -29,11 +29,6 @@ interface Game {
 
 export const GamePage = () => {
     const [events,setEvents]=useState<string[]>([""])
-    const [game, setGame] = useState<Game>({
-        counter: 0,
-        started: false,
-        players: []
-    });
     const [player,setPlayer]=useState<Player[]>([])
     const [gameState,setGameState]=useState(false);
     const [status,setStatus]=useState(false);
@@ -78,7 +73,6 @@ export const GamePage = () => {
             setEvents((prev)=>[msg,...prev])
         }
         const handleGameState = (msg:Game)=>{
-            setGame(msg)
             setPlayer(msg.players)
             setGameState(msg.started)
             const isCreater = msg.players.filter((p)=>p.username===username && p.leader===true)
@@ -94,21 +88,11 @@ export const GamePage = () => {
                 case "join" :
                     if(typeof data !== "object")
                         return
-                    setGame((prev)=>{
-                        if(!prev)
-                            return prev
-                        return {...prev, players: [...prev.players, data as Player]}
-                    })
                     setPlayer((prev)=>[...prev,data as Player])
                     break
                 case "left" :
                     if(typeof data !== "object")
                         return
-                    setGame((prev)=> {
-                        if(!prev)
-                            return prev
-                        return {...prev,players:[...prev.players.filter((p)=>p.username !== data.username)]}
-                    })
                     setPlayer((prev)=>[...prev.filter((p)=>p.username!== data.username)])
                     break
                 case "status" :
@@ -129,9 +113,6 @@ export const GamePage = () => {
                     let i = 4
                     setInterval(()=>{
                         if(i===0){
-                            setGame((prev)=>{
-                                return {...prev,started:true}
-                            })
                             setGameState(true)
                             return
                         }
@@ -142,10 +123,6 @@ export const GamePage = () => {
                 case "stop":
                     if(typeof data !== "string")
                         return
-                    setGame((prev) => {
-                        const newState = { ...prev, started: false };
-                        return newState;
-                    });
                     setGameState(false)
                     toast.info(`Game stopped : ${data}`)
                     break

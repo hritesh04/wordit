@@ -19,9 +19,10 @@ io.on("connection",(socket) => {
     // creating room
     socket.on("createRoom", (roomId) => {
         const game = GameManager.getInstance();
-        game.addAndJoinRoom(roomId,socket.username)
         socket.join(roomId)
         socket.roomId=roomId
+        // creates room and adds player
+        game.addAndJoinRoom(roomId,socket.username)
         socket.emit("info",`Room with id ${roomId} successfully created`)
         socket.emit("redirects",`${socket.username}/${roomId}`)
         io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
@@ -35,6 +36,7 @@ io.on("connection",(socket) => {
         }
         if(rooms && rooms.get(roomId)){
             const game = GameManager.getInstance()
+            // join room
             const success = game.joinRoom(roomId,socket.username)
             if(!success){
                 socket.emit("errors","Game already started")
@@ -45,6 +47,7 @@ io.on("connection",(socket) => {
             socket.emit("info",`successfully joined room ${roomId}`)
             socket.emit("redirects",`${socket.username}/${roomId}`)
             io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
+            // new player joined update
             socket.broadcast.to(roomId).emit("update",{type:"join",data:{username:socket.username,status:false,leader:false,lives:3}})
         }else{
             socket.emit("errors",`unable to join room - ${roomId}`)
@@ -55,7 +58,6 @@ io.on("connection",(socket) => {
     socket.on("status",()=>{
         const game = GameManager.getInstance()
         const status = game.setState(socket.roomId,socket.username)
-        const gameState = game.getGameState(socket.roomId);
         io.in(socket.roomId).emit("roomEvents",`${socket.username} is ${status ? "ready" : "not ready"}`)
         socket.broadcast.to(socket.roomId).emit("update",{type:"status",data:{username:socket.username,status,leader:false}})
     })
@@ -74,7 +76,8 @@ io.on("connection",(socket) => {
                 io.in(socket.roomId).emit("suffix", getSuffix(""))
                 },5000)
         }else{
-            io.in(socket.roomId).emit("roomEvents","not all players are ready")
+            socket.emit("msg","Players not ready")
+            io.in(socket.roomId).emit("roomEvents","all players are not ready")
         }
     })
 
@@ -91,23 +94,31 @@ io.on("connection",(socket) => {
 
     // guess if the word is correct
     socket.on("guess",({word,suffix})=>{
-        socket.broadcast.in(socket.roomId).emit("update",{type:"guess",data:word})
+        // socket.broadcast.in(socket.roomId).emit("update",{type:"guess",data:word})
         const isCorrect = checkWord(word+suffix)
         const game = GameManager.getInstance()
-        const player = game.next(socket.roomId)
         if(!isCorrect){
             game.reduceLive(socket.roomId,socket.username)
             const room = game.getGameState(socket.roomId)
-            if(room?.players.length === 1){
-                io.in(socket.roomId).emit("roomEvents",`The Winner is ${room.players[0].username}`)
-                io.in(socket.roomId).emit("state",room)
+            if(!room){
                 return
             }
-            io.in(socket.roomId).emit("roomEvents","Wrong Answer")
-            io.in(socket.roomId).emit("state",room)
+            if(room.players.length === 1){
+                io.in(socket.roomId).emit("roomEvents",`The Winner is ${room.players[0].username}`)
+                io.in(socket.roomId).emit("state",room)
+                socket.leave(socket.roomId)
+            }else{
+                const player = game.next(socket.roomId)
+                io.in(socket.roomId).emit("roomEvents","Wrong Answer")
+                io.in(socket.roomId).emit("turn",player)
+                io.in(socket.roomId).emit("suffix",getSuffix(suffix))    
+                io.in(socket.roomId).emit("state",room)
+            }
+        }else{
+            const player = game.next(socket.roomId)
+            io.in(socket.roomId).emit("turn",player)
+            io.in(socket.roomId).emit("suffix",getSuffix(suffix))    
         }
-        io.in(socket.roomId).emit("turn",player)
-        io.in(socket.roomId).emit("suffix",getSuffix(suffix))    
     })
 
     // leave room
@@ -116,6 +127,11 @@ io.on("connection",(socket) => {
         game.leaveRoom(socket.roomId,socket.username)
         socket.leave(socket.roomId)
         io.in(socket.roomId).emit("roomEvents",`${socket.username} left the room`)
+        const newLeader = game.getLeader(socket.roomId)
+        socket.broadcast.to(socket.roomId).emit("update",{type:"left",data:{username:socket.username,status:false,leader:false}})
+        if(newLeader){
+            io.to(socket.roomId).emit("update",{type:"leader",data:{username:newLeader.username,status:newLeader.status,leader:newLeader.leader}})
+        }
         const gameState = game.getGameState(socket.roomId)
         if(!gameState){
             return
@@ -123,11 +139,6 @@ io.on("connection",(socket) => {
         if(gameState.players.length <= 1){
             io.to(socket.roomId).emit("update",{type:"stop",data:"not enough player"})
             io.to(socket.roomId).emit("state",gameState)
-        }
-        const newLeader = game.getLeader(socket.roomId)
-        socket.broadcast.to(socket.roomId).emit("update",{type:"left",data:{username:socket.username,status:false,leader:false}})
-        if(newLeader){
-            io.to(socket.roomId).emit("update",{type:"leader",data:{username:newLeader.username,status:newLeader.status,leader:newLeader.leader}})
         }
         if(gameState.started && turn){
             const nextTurn = game.next(socket.roomId)

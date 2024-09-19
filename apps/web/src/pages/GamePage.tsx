@@ -30,16 +30,39 @@ interface Game {
 export const GamePage = () => {
     const [events,setEvents]=useState<string[]>([""])
     const [player,setPlayer]=useState<Player[]>([])
-    const [gameState,setGameState]=useState(false);
+    const [gameState,setGameState]=useState<boolean>(false);
     const [status,setStatus]=useState(false);
     const [isLeader,setIsLeader]=useState(false);
     const [turn,setTurn]=useState("");
     const [suffix,setSuffix] = useState("");
     const [guess,setGuess]= useState("");
+   // const [guessIntervalId, setGuessIntervalId] = useState<NodeJS.Timeout | null>(null);
     const navigate = useNavigate()
     const {name,roomId} = useParams();
     const[username,setUsername]=useState(name)
 
+    // const startGuessInterval = () => {
+    //     let i = 3;
+    //     const interval = setInterval(() => {
+    //         if (i === 0) {
+    //             socket.emit("guess", { word: "", suffix });
+    //             setGuess("");
+    //             clearInterval(interval);
+    //         } else {
+    //             toast.info(i);
+    //             i--;
+    //         }
+    //     }, 1000);
+    //     setGuessIntervalId(interval);
+    // };
+
+    // const clearGuessInterval = () => {
+    //     if (guessIntervalId) {
+    //         clearInterval(guessIntervalId);
+    //         setGuessIntervalId(null);
+    //     }
+    // };
+        
     const handleReadyStatus = () => {
         if(isLeader){
             socket.emit("start")
@@ -62,6 +85,7 @@ export const GamePage = () => {
     const handleSubmitGuess = () => {
         socket.emit("guess",{word:guess,suffix})
         setGuess("")
+        //clearGuessInterval()
     }
     useEffect(()=>{
         if(!socket.connected){
@@ -72,16 +96,17 @@ export const GamePage = () => {
         const handleRoomEvents = (msg:string)=>{
             setEvents((prev)=>[msg,...prev])
         }
+
         const handleGameState = (msg:Game)=>{
             setPlayer(msg.players)
             setGameState(msg.started)
             const isCreater = msg.players.filter((p)=>p.username===username && p.leader===true)
-            console.log(msg)
             if(isCreater.length !== 0){
                 setIsLeader(true)
                 setStatus(true)
             }
         }
+        
         const handleUpdate = (msg:Update) => {
             const {type,data} = msg;
             switch (type){
@@ -111,9 +136,10 @@ export const GamePage = () => {
                         return
                     toast.info(data)
                     let i = 4
-                    setInterval(()=>{
+                    const interval = setInterval(()=>{
                         if(i===0){
                             setGameState(true)
+                            clearInterval(interval)
                             return
                         }
                         toast.info(i)
@@ -149,6 +175,7 @@ export const GamePage = () => {
                 }
             }
         const handleTurn = (msg:string) => {
+           // startGuessInterval()
             setTurn(msg)
         }
         const handleSuffix = (msg:string) => {
@@ -158,6 +185,9 @@ export const GamePage = () => {
         socket.on("update",handleUpdate)
         socket.on("name",(data)=>{
             setUsername(data)
+        })
+        socket.on("msg",(data)=>{
+            toast.info(data)
         })
         socket.on("turn",handleTurn)
         socket.on("suffix",handleSuffix)

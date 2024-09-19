@@ -24,10 +24,12 @@ export class GameManager {
     }
     addAndJoinRoom(roomId:string,username:string){
         this.games.set(roomId,{counter:0,started:false,players:[{username,status:true,leader:true,lives:3}]})
-        console.dir(this.games,{dept:null})
+        // console.dir(this.games,{dept:null})
     }
     joinRoom(roomId:string,username:string):boolean{
-        const room = this.games.get(roomId)!
+        const room = this.games.get(roomId)
+        if(!room)
+            return false
         if(room.started)
             return false
         room.players.push({username,status:false,leader:false,lives:3})
@@ -63,7 +65,6 @@ export class GameManager {
     next(roomId:string):string{
         const room = this.games.get(roomId)!
         room.counter++;
-        console.dir(this.games,{dept:null})
         return room.players[room.counter%room.players.length].username
     }
     getGameState(roomId:string){
@@ -124,7 +125,8 @@ export class GameManager {
         const playerIndex = room.players.findIndex((p)=>p.username===username)
         if(room.players[playerIndex].lives === 1){
             this.leaveRoom(roomId,username)
+        }else{
+            room.players[playerIndex].lives--;
         }
-        room.players[playerIndex].lives--;
     }
 }

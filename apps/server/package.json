@@ -20,6 +20,7 @@
     "typo-js": "^1.2.4"
   },
   "devDependencies": {
-    "@types/typo-js": "^1.2.2"
+    "@types/typo-js": "^1.2.2",
+    "typescript": "^5.6.2"
   }
 }

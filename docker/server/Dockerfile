@@ -1,4 +1,4 @@
-FROM node:18-alpine as builder
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY ./apps/server .
 
 RUN npm run build
 
-FROM node:18-alpine as production 
+FROM node:18-alpine AS production 
 
 WORKDIR /app
 
@@ -22,7 +22,8 @@ COPY --from=builder /app/dist ./dist
 
 COPY --from=builder /app/assets ./assets
 
-COPY --from=builder /app/.env ./.env
+ARG FRONTEND_URL
+ARG PORT
 
 EXPOSE 3000
 

@@ -29,3 +29,10 @@ jobs:
           file: ./docker/server/Dockerfile
           push: true
           tags: ${{ github.actor }}/wordit-server:${{ github.sha }}
+      
+      - name: Deploy Docker image to Render
+        uses: gh-actions-workflows/deploy-docker-render@v1.3
+        with:
+          deploy-hook: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          image-url: ${{ secrets.DOCKERHUB_USERNAME }}/wordit-server:${{ github.sha }}
+            

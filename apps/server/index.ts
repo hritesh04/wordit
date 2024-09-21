@@ -23,6 +23,7 @@ io.on("connection",(socket) => {
         socket.roomId=roomId
         // creates room and adds player
         game.addAndJoinRoom(roomId,socket.username)
+        console.log(`created room : ${roomId}`)
         socket.emit("info",`Room with id ${roomId} successfully created`)
         socket.emit("redirects",`${socket.username}/${roomId}`)
         io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
@@ -44,6 +45,7 @@ io.on("connection",(socket) => {
             }
             socket.join(roomId)
             socket.roomId=roomId
+            console.log(`${socket.username} joined room ${roomId}`)
             socket.emit("info",`successfully joined room ${roomId}`)
             socket.emit("redirects",`${socket.username}/${roomId}`)
             io.in(roomId).emit("roomEvents",`${socket.username} joined the room`)
@@ -69,6 +71,7 @@ io.on("connection",(socket) => {
         if(allPlayersReady){
             io.in(socket.roomId).emit("roomEvents","game will start in 5 seconds")
             io.in(socket.roomId).emit("update",{type:"start",data:"Game Starting in 5 seconds"})
+            console.log(`room ${socket.roomId} started`)
             setTimeout(()=>{
                 const nextTurn = game.next(socket.roomId)
                 io.in(socket.roomId).emit("roomEvents",`${nextTurn}'s turn`)
@@ -126,6 +129,7 @@ io.on("connection",(socket) => {
         const game = GameManager.getInstance()
         game.leaveRoom(socket.roomId,socket.username)
         socket.leave(socket.roomId)
+        console.log(`${socket.username} left room ${socket.roomId}`)
         io.in(socket.roomId).emit("roomEvents",`${socket.username} left the room`)
         const newLeader = game.getLeader(socket.roomId)
         socket.broadcast.to(socket.roomId).emit("update",{type:"left",data:{username:socket.username,status:false,leader:false}})
@@ -153,6 +157,7 @@ io.on("connection",(socket) => {
         const game = GameManager.getInstance()
         game.leaveRoom(socket.roomId,socket.username)
         socket.leave(socket.roomId)
+        console.log(`${socket.username} disconnected`)
         io.in(socket.roomId).emit("roomEvents",`${socket.username} left the room`)
         const gameState = game.getGameState(socket.roomId)
         if(!gameState){
@@ -170,5 +175,6 @@ io.on("connection",(socket) => {
 })
 
 server.listen(process.env.PORT, () => {
-  console.log(`server running at port ${process.env.PORT}`);
+    console.log("server ready ! ")
+    console.log(`server running at port ${process.env.PORT}`);
 });

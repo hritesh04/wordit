@@ -11,6 +11,7 @@ export const GameBackGround = () => {
     return(
         <>
             <Textbg 
+                starCount={1000000}
                 starColor={[255, 255, 255]}
                 speedFactor={0.07}
                 backgroundColor="black"

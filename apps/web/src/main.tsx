@@ -7,9 +7,11 @@ import Routes from './routes/Routes.tsx'
 import { Toaster } from 'sonner'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
+    <>
     <Analytics />
     <RouterProvider router={Routes} />
     <Toaster richColors position='top-center'/>
-  </React.StrictMode>,
+    </>
+  // </React.StrictMode>,
 )

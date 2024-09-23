@@ -105,6 +105,7 @@ io.on("connection",(socket) => {
             }
             if(room.players.length === 1){
                 io.in(socket.roomId).emit("roomEvents",`The Winner is ${room.players[0].username}`)
+                io.in(socket.roomId).emit("update",{type:"winner",data:room.players[0].username})
                 io.in(socket.roomId).emit("state",room)
                 socket.leave(socket.roomId)
             }else{

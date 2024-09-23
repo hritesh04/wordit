@@ -20,3 +20,51 @@ body,
 .fade {
   -webkit-mask-image: linear-gradient(0deg, #000 30%, transparent);
 }
+
+/* Mobile styles */
+@media (max-width: 767px) {
+    .flex-col {
+        flex-direction: column;
+    }
+    .w-full {
+        width: 100%;
+    }
+    .gap-4 {
+        gap: 1rem;
+    }
+    .p-8 {
+        padding: 2rem;
+    }
+}
+
+/* Tablet styles */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .flex-row {
+        flex-direction: row;
+    }
+    .w-40 {
+        width: 10rem;
+    }
+    .gap-8 {
+        gap: 2rem;
+    }
+    .p-8 {
+        padding: 2rem;
+    }
+}
+
+/* Desktop styles */
+@media (min-width: 1024px) {
+    .flex-row {
+        flex-direction: row;
+    }
+    .w-40 {
+        width: 10rem;
+    }
+    .gap-8 {
+        gap: 2rem;
+    }
+    .p-8 {
+        padding: 2rem;
+    }
+}

@@ -261,59 +261,70 @@ export const GamePage = () => {
             <div className="h-full grid grid-rows-5 max-h-screen md:flex overflow-hidden">
                 <div className="h-full md:w-9/12 row-span-3">
                     <GameBoard>
-                        {
-                            gameState && 
+                        {gameState && (
                             <>
                                 <div>{turn} is Playing</div>
-                                {turn === username ? 
-                                <div className=" flex items-center gap-4">
-                                    <div>
-                                    <input className="bg-transparent border-b text-end w-40 focus:outline-none text-white" onChange={(e)=>setGuess(e.target.value)}/>{suffix}
-                                    </div>
-                                    <button className="p-4 rounded-md bg-white/20 backdrop-blur-md shadow-lg shadow-white/10 text-white hover:bg-white/30 transition-all duration-200"
-                                    onClick={handleSubmitGuess}
-                                    >Submit</button>
-                                    {countdown !== null && (
-                                        <div className="w-12 h-12">
-                                            <CircularProgressbar
-                                                value={(countdown / 5) * 100}
-                                                text={`${countdown}s`}
-                                                styles={buildStyles({
-                                                    textColor: "white",
-                                                    pathColor: "white",
-                                                    trailColor: "rgba(255, 255, 255, 0.2)",
-                                                    textSize: "45px"
-                                                })}
+                                {turn === username ? (
+                                    <div className="flex flex-col md:flex-row items-center gap-4">
+                                            {countdown !== null && (
+                                                <div className="w-12 h-12">
+                                                    <CircularProgressbar
+                                                        value={(countdown / 5) * 100}
+                                                        text={`${countdown}s`}
+                                                        styles={buildStyles({
+                                                            textColor: "white",
+                                                            pathColor: "white",
+                                                            trailColor: "rgba(255, 255, 255, 0.2)",
+                                                            textSize: "45px"
+                                                        })}
+                                                    />
+                                                </div>
+                                            )}
+                                        <div className="flex justify-center">
+                                            <input
+                                                className="bg-transparent border-b text-end w-1/2 md:w-40 focus:outline-none text-white"
+                                                onChange={(e) => setGuess(e.target.value)}
                                             />
+                                            {suffix}
                                         </div>
-                                    )}
-                                </div>
-                                :
-                                <div className=" flex items-center gap-4">
-                                        <div className=" min-w-28 border-b text-end">{guess+suffix}</div>
-                                </div>    
-                                }
+                                        <button
+                                            className="p-4 rounded-md bg-white/20 backdrop-blur-md shadow-lg shadow-white/10 text-white hover:bg-white/30 transition-all duration-200"
+                                            onClick={handleSubmitGuess}
+                                        >
+                                            Submit
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="flex items-baseline gap-4">
+                                        <div className="min-w-28 border-b text-end">{guess}</div>
+                                        {suffix}
+                                    </div>
+                                )}
                             </>
-                        }
+                        )}
                     </GameBoard>
                 </div>
                 <div className="h-full overflow-hidden row-span-2 md:w-3/12 gap-2 flex flex-col-reverse">
                     <div className="overflow-auto order-1 h-1/4 flex flex-wrap p-2 md:order-2">
-                    <PlayersBox>
-                        {player.map((p)=> <PlayerCard key={p.username} state={gameState} player={p} turn={turn}/>)}
-                    </PlayersBox>
+                        <PlayersBox>
+                            {player.map((p) => (
+                                <PlayerCard key={p.username} state={gameState} player={p} turn={turn} />
+                            ))}
+                        </PlayersBox>
                     </div>
-                    <EventBox events={events}/>
+                    <EventBox events={events} />
                     <div className="flex-none">
                         <StatusButton>
-                            {
-                                !gameState &&
-                                <button className={`rounded-md p-8 w-full ${status || isLeader ? "bg-red-600" : "bg-green-500"}`}
-                                onClick={handleReadyStatus}>
-                                {status && isLeader ? "Start" : status ? "Cancel" :" Ready"}
-                            </button>
-                            }
-                            <button className={`p-8 rounded-md w-full ${gameState ? "bg-red-600" : "bg-slate-500"}`}
+                            {!gameState && (
+                                <button
+                                className={`rounded-md p-4 md:p-8 w-1/2 ${status || isLeader ? "bg-red-600" : "bg-green-500"}`}
+                                onClick={handleReadyStatus}
+                                >
+                                    {status && isLeader ? "Start" : status ? "Cancel" : "Ready"}
+                                </button>
+                            )}
+                            <button
+                                className={`p-4 md:p-8 rounded-md ${gameState ? "bg-red-600 w-full" : "bg-slate-500"} ${!gameState ? "w-1/2" : "w-full"}`}
                                 onClick={handleExitRoom}
                             >
                                 Exit Room

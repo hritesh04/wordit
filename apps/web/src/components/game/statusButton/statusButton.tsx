@@ -1,7 +1,7 @@
-export const StatusButton = ({children}:{children:React.ReactNode}) => {
+export const StatusButton = ({ children }: { children: React.ReactNode }) => {
     return (
-        <div className="flex shadow-xl p-2 justify-center text-3xl items-center gap-2">
+        <div className="flex flex-row text-3xl gap-4">
             {children}
         </div>
-    )
-}
+    );
+};

@@ -111,7 +111,6 @@ export const GamePage = () => {
         
         const handleUpdate = (msg:Update) => {
             const {type,data} = msg;
-            console.log("Received update:", type, data); // Add this log
             switch (type){
                 case "join" :
                     if(typeof data !== "object")
@@ -177,7 +176,6 @@ export const GamePage = () => {
                     break
                 case "winner":
                     if (typeof data === "string") {
-                        console.log("Winner declared:", data); // Add this log
                         setWinner(data);
                         setShowCelebration(true);
                         celebrationTimerRef.current = setTimeout(() => {
@@ -223,8 +221,6 @@ export const GamePage = () => {
             }
         };
     },[])
-    
-    console.log("Render - showCelebration:", showCelebration, "winner:", winner); // Add this log
 
     return(
         <>

@@ -6,9 +6,12 @@ import { PlayerCard } from "../components/game/players/PlayerCard"
 import { connectSocket } from "../utils/connectSocket"
 import { StatusButton } from "../components/game/statusButton/statusButton"
 import { useNavigate, useParams } from "react-router-dom"
-import { toast } from "sonner"
 import { GameBoard } from "../components/game/gameBoard/GameBoard"
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import { Modal } from "../components/game/Modal"
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import 'react-circular-progressbar/dist/styles.css';
 
 interface Update {
     type:string;
@@ -136,23 +139,49 @@ export const GamePage = () => {
                 case "start" :
                     if(typeof data !== "string")
                         return
-                    toast.info(data)
-                    let i = 4
-                    const interval = setInterval(()=>{
-                        if(i===0){
-                            setGameState(true)
-                            clearInterval(interval)
-                            return
+                    let countdown = 5;
+                    const toastId = toast(`Game starting in ${countdown} seconds`, {
+                        autoClose: false,
+                        closeOnClick: true,
+                        draggable: true,
+                        theme: "dark"
+                    });
+
+                    const interval = setInterval(() => {
+                        countdown -= 1;
+                        if (countdown === 0) {
+                            setGameState(true);
+                            clearInterval(interval);
+                            toast.update(toastId, {
+                                render: "Game started!",
+                                type: "default",
+                                autoClose: 2000,
+                                closeOnClick: true,
+                                draggable: true,
+                                theme: "dark"
+                            });
+                            return;
                         }
-                        toast.info(i)
-                        i--
-                    },1000)
-                    break
+                        toast.update(toastId, {
+                            render: `Game starting in ${countdown} seconds`,
+                            type: "default",
+                            autoClose: false,
+                            closeOnClick: true,
+                            draggable: true,
+                            theme: "dark"
+                        });
+                    }, 1000);
+                    break;
                 case "stop":
                     if(typeof data !== "string")
                         return
                     setGameState(false)
-                    toast.info(`Game stopped : ${data}`)
+                    toast(`Game stopped : ${data}`,{
+                        autoClose: 2000,
+                        closeOnClick: true,
+                        draggable: true,
+                        theme: "dark"
+                    })
                     break
                 case "guess":
                     if(typeof data !== "string")
@@ -200,7 +229,12 @@ export const GamePage = () => {
             setUsername(data)
         })
         socket.on("msg",(data)=>{
-            toast.info(data)
+            toast.error(data, {
+                autoClose: 2000,
+                closeOnClick: true,
+                draggable: true,
+                theme: "dark"
+            });
         })
         socket.on("turn",handleTurn)
         socket.on("suffix",handleSuffix)
@@ -240,7 +274,18 @@ export const GamePage = () => {
                                     onClick={handleSubmitGuess}
                                     >Submit</button>
                                     {countdown !== null && (
-                                        <div className="text-white">Time left: {countdown}s</div>
+                                        <div className="w-12 h-12">
+                                            <CircularProgressbar
+                                                value={(countdown / 5) * 100}
+                                                text={`${countdown}s`}
+                                                styles={buildStyles({
+                                                    textColor: "white",
+                                                    pathColor: "white",
+                                                    trailColor: "rgba(255, 255, 255, 0.2)",
+                                                    textSize: "45px"
+                                                })}
+                                            />
+                                        </div>
                                     )}
                                 </div>
                                 :
@@ -300,6 +345,17 @@ export const GamePage = () => {
                     </div>
                 </Modal>
             )}
+            <ToastContainer
+                position="top-center"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+            />
         </>
     )
 }

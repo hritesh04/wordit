@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { socket } from "../../socket";
 import { connectSocket } from "../../utils/connectSocket";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
+
 export const RoomCard = () => {
     const [select, setSelect] = useState("");
     const [roomId,setRoomId] =useState("");
@@ -22,7 +23,12 @@ export const RoomCard = () => {
         if(!isConnected){
             const success = connectSocket()
             if(!success){
-                toast.error("unable to connect socket")
+                toast.error("unable to connect socket",{
+                    autoClose: 2000,
+                    closeOnClick: true,
+                    draggable: true,
+                    theme: "dark"
+                })
                 return
             }
         }
@@ -38,7 +44,12 @@ export const RoomCard = () => {
         if(!isConnected){
             const success = connectSocket()
             if(!success){
-                toast.error("unable to connect socket")
+                toast.error("unable to connect socket",{
+                    autoClose: 2000,
+                    closeOnClick: true,
+                    draggable: true,
+                    theme: "dark"
+                })
                 return
             }
         }
@@ -47,13 +58,23 @@ export const RoomCard = () => {
     
     useEffect(()=>{
         const handleErrorEvents = (msg:string) => {
-            toast.error(msg)
+            toast.error(msg,{
+                autoClose: 2000,
+                closeOnClick: true,
+                draggable: true,
+                theme: "dark"
+            })
         } 
         const handleRedirects = (msg:string)=>{
             naviagte(msg)
         }
         const handleInfoEvents = (msg:string)=>{
-            toast.info(msg)
+            toast.info(msg,{
+                autoClose: 2000,
+                closeOnClick: true,
+                draggable: true,
+                theme: "dark"
+            })
         }
         socket.on("errors",handleErrorEvents)
         socket.on("redirects",handleRedirects)

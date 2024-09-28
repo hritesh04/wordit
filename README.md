@@ -1,81 +1,64 @@
-# Turborepo starter
+# WordIt - Multiplayer Word Game
 
-This is an official starter Turborepo.
+WordIt is an interactive, real-time multiplayer word game built with React, TypeScript, and Socket.io. Players join rooms and take turns creating words with given suffixes, challenging their vocabulary and quick thinking skills. Each player has a limited number of lives, and the game continues until only one player remains.
 
-## Using this example
+## Project Structure
 
-Run the following command:
+This project uses a monorepo structure managed by Turborepo. The main components are:
 
-```sh
-npx create-turbo@latest
-```
+- `apps/web`: The frontend React application
+- `apps/server`: The backend Node.js server
+- `packages/typescript-config`: Shared TypeScript configurations
 
-## What's inside?
+## Features
 
-This Turborepo includes the following packages/apps:
+- Real-time multiplayer gameplay
+- Room creation and joining
+- Turn-based word creation with suffixes
+- Live player status updates
+- Responsive design for various screen sizes
+- Animated backgrounds
 
-### Apps and Packages
+## Technologies Used
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- Frontend:
+  - React
+  - TypeScript
+  - Vite
+  - Tailwind CSS
+  - Socket.IO Client
+- Backend:
+  - Node.js
+  - Express
+  - Socket.io
+  - Typo.js for spell checking
+- Shared:
+  - Turborepo for monorepo management
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Getting Started
 
-### Utilities
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the development servers:
+   ```
+   npm run dev
+   ```
 
-This Turborepo has some additional tools already setup for you:
+This will start both the frontend and backend servers concurrently.
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Game Rules
 
-### Build
+1. Players join a room
+2. The game starts when more than half of the players are ready
+3. Each turn, a player is given a suffix
+4. The player must create a valid word ending with the given suffix
+5. If the word is valid, play passes to the next player
+6. If the word is invalid, the player loses a life and play passes to the next player
+7. The game continues until only one player remains
 
-To build all apps and packages, run the following command:
+## Contributing
 
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+Contributions are welcome! Please feel free to submit a Pull Request.
